@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { PoolService } from '../core/pool.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersDao } from './dao/users.dao';
@@ -21,7 +20,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [
-    PoolService,
     UsersDao,
     PatientsDao,
     RefreshTokensDao,
