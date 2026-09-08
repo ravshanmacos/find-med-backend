@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
-import { PatientsService } from './patients.service';
+import { PatientsService } from './providers/patients.service';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { JwtAuthGuard } from '../../config/guards/jwt-auth.guard';
 import { RolesGuard } from '../../config/guards/roles.guard';

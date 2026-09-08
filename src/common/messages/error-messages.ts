@@ -53,4 +53,9 @@ export const ERROR_MESSAGES = {
     ru: 'Эта специальность уже существует',
     uz: "Bu yo'nalish allaqachon mavjud",
   },
+  SPECIALTY_NOT_FOUND: {
+    en: 'Specialty not found',
+    ru: 'Специальность не найдена',
+    uz: "Yo'nalish topilmadi",
+  },
 };

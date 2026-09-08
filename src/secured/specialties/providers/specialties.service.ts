@@ -1,11 +1,11 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { BaseService } from '../../core/base.service';
-import { PoolService } from '../../core/pool.service';
-import { wrapInTransaction } from '../../utils';
-import { ERROR_MESSAGES } from '../../common/messages/error-messages';
-import { SpecialtyException } from '../../common/exceptions/specialty.exceptions';
+import { BaseService } from '../../../core/base.service';
+import { PoolService } from '../../../core/pool.service';
+import { wrapInTransaction } from '../../../utils';
+import { ERROR_MESSAGES } from '../../../common/messages/error-messages';
+import { SpecialtyException } from '../../../common/exceptions/specialty.exceptions';
 import { SpecialtiesDao } from './specialties.dao';
-import { CreateSpecialtyDto } from './dto/create-specialty.dto';
+import { CreateSpecialtyDto } from '../dto/create-specialty.dto';
 
 @Injectable()
 export class SpecialtiesService extends BaseService {

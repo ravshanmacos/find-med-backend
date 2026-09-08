@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { SpecialtiesService } from './specialties.service';
+import { SpecialtiesService } from './providers/specialties.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { JwtAuthGuard } from '../../config/guards/jwt-auth.guard';
 import { RolesGuard } from '../../config/guards/roles.guard';

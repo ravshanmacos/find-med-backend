@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { BaseService } from '../../core/base.service';
-import { PoolService } from '../../core/pool.service';
+import { BaseService } from '../../../core/base.service';
+import { PoolService } from '../../../core/pool.service';
 import { PatientsDao } from './patients.dao';
-import { UpdatePatientDto } from './dto/update-patient.dto';
+import { UpdatePatientDto } from '../dto/update-patient.dto';
 
 @Injectable()
 export class PatientsService extends BaseService {

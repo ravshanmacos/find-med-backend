@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDao } from '../../core/base.dao';
-import { tableNames, Queryable } from '../../common/constants/constants';
-import { getRows, runKnex } from '../../utils';
+import { BaseDao } from '../../../core/base.dao';
+import { tableNames, Queryable } from '../../../common/constants/constants';
+import { getRows, runKnex } from '../../../utils';
 
 @Injectable()
 export class DoctorSpecialtiesDao extends BaseDao {
