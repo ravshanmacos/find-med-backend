@@ -43,4 +43,9 @@ export const ERROR_MESSAGES = {
     ru: 'Приглашение недействительно или истекло',
     uz: 'Taklif yaroqsiz yoki muddati tugagan',
   },
+  NOT_PROFILE_OWNER: {
+    en: 'You can only edit your own profile',
+    ru: 'Вы можете редактировать только свой профиль',
+    uz: "Siz faqat o'z profilingizni tahrirlay olasiz",
+  },
 };
