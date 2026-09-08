@@ -10,12 +10,16 @@ import { AuthException } from '../common/exceptions/auth.exceptions';
 import { UsersDao } from './dao/users.dao';
 import { PatientsDao } from './dao/patients.dao';
 import { RefreshTokensDao } from './dao/refresh-tokens.dao';
+import { DoctorsDao } from './dao/doctors.dao';
+import { DoctorInvitesDao } from './dao/doctor-invites.dao';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { AcceptDoctorInviteDto } from './dto/accept-doctor-invite.dto';
 import { AuthTokens, JwtPayload } from './interfaces/jwt-payload.interface';
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN ?? '20m';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN ?? '30d';
+const DOCTOR_INVITE_EXPIRES_IN = process.env.DOCTOR_INVITE_EXPIRES_IN ?? '7d';
 const SALT_ROUNDS = 10;
 
 @Injectable()
@@ -25,6 +29,8 @@ export class AuthService {
     private readonly usersDao: UsersDao,
     private readonly patientsDao: PatientsDao,
     private readonly refreshTokensDao: RefreshTokensDao,
+    private readonly doctorsDao: DoctorsDao,
+    private readonly doctorInvitesDao: DoctorInvitesDao,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -127,6 +133,107 @@ export class AuthService {
     );
 
     return { success: true };
+  }
+
+  /**
+   * Called by an admin. Returns the raw invite token — the admin sends it
+   * to the doctor themselves (email/SMS — out of scope for now).
+   */
+  createDoctorInvite(
+    doctorId: string,
+  ): Promise<{ inviteToken: string; expiresAt: Date }> {
+    return wrapInTransaction(this.poolService.pool, async (client) => {
+      const doctor = await this.doctorsDao.findOne(client, doctorId);
+
+      if (!doctor) {
+        throw new AuthException(
+          ERROR_MESSAGES.DOCTOR_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (doctor.user_id) {
+        throw new AuthException(
+          ERROR_MESSAGES.DOCTOR_ALREADY_LINKED,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const rawInviteToken = crypto.randomBytes(48).toString('hex');
+      const tokenHash = this.hashToken(rawInviteToken);
+      const expiresAt = new Date(
+        Date.now() + this.parseExpiryToMs(DOCTOR_INVITE_EXPIRES_IN),
+      );
+
+      await this.doctorInvitesDao.insert(client, {
+        doctor_id: doctorId,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      });
+
+      return { inviteToken: rawInviteToken, expiresAt };
+    });
+  }
+
+  /**
+   * Called by the doctor. Validates the invite, creates a User, links
+   * Doctor.user_id, then immediately logs them in.
+   */
+  acceptDoctorInvite(dto: AcceptDoctorInviteDto): Promise<AuthTokens> {
+    return wrapInTransaction(this.poolService.pool, async (client) => {
+      const tokenHash = this.hashToken(dto.token);
+      const invite = await this.doctorInvitesDao.findValidByHash(
+        client,
+        tokenHash,
+      );
+
+      if (!invite) {
+        throw new AuthException(ERROR_MESSAGES.INVALID_OR_EXPIRED_INVITE);
+      }
+
+      const doctor = await this.doctorsDao.findOne(client, invite.doctor_id);
+
+      if (!doctor || doctor.user_id) {
+        throw new AuthException(
+          ERROR_MESSAGES.DOCTOR_ALREADY_LINKED,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const existingUser = await this.usersDao.findOneBy(client, {
+        email: dto.email,
+      });
+
+      if (existingUser) {
+        throw new AuthException(
+          ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+
+      const user = await this.usersDao.insert(client, {
+        email: dto.email,
+        password_hash: passwordHash,
+        phone: dto.phone ?? null,
+        role: 'DOCTOR',
+      });
+
+      await this.doctorsDao.update(
+        client,
+        { user_id: user.id },
+        { id: doctor.id },
+      );
+
+      await this.doctorInvitesDao.update(
+        client,
+        { used_at: new Date() },
+        { id: invite.id },
+      );
+
+      return this.issueTokens(client, user.id, user.role);
+    });
   }
 
   private async issueTokens(

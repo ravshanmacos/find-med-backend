@@ -28,4 +28,19 @@ export const ERROR_MESSAGES = {
     ru: 'Refresh токен недействителен или истёк',
     uz: 'Refresh token yaroqsiz yoki muddati tugagan',
   },
+  DOCTOR_NOT_FOUND: {
+    en: 'Doctor not found',
+    ru: 'Врач не найден',
+    uz: 'Shifokor topilmadi',
+  },
+  DOCTOR_ALREADY_LINKED: {
+    en: 'This doctor already has an account',
+    ru: 'У этого врача уже есть аккаунт',
+    uz: 'Bu shifokorning akkaunti allaqachon mavjud',
+  },
+  INVALID_OR_EXPIRED_INVITE: {
+    en: 'Invite is invalid or has expired',
+    ru: 'Приглашение недействительно или истекло',
+    uz: 'Taklif yaroqsiz yoki muddati tugagan',
+  },
 };

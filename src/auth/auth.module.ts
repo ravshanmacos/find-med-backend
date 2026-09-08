@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { UsersDao } from './dao/users.dao';
 import { PatientsDao } from './dao/patients.dao';
 import { RefreshTokensDao } from './dao/refresh-tokens.dao';
+import { DoctorsDao } from './dao/doctors.dao';
+import { DoctorInvitesDao } from './dao/doctor-invites.dao';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -23,6 +25,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     UsersDao,
     PatientsDao,
     RefreshTokensDao,
+    DoctorsDao,
+    DoctorInvitesDao,
     AuthService,
     JwtStrategy,
   ],
