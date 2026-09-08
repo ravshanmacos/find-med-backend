@@ -6,4 +6,11 @@ export type WhereInParamsType = {
   [key: string]: string[];
 };
 
-export const tableNames = {};
+export const tableNames = {
+  products: 'products',
+  users: 'users',
+  patients: 'patients',
+  doctors: 'doctors',
+  refreshTokens: 'refresh_tokens',
+  doctorInvites: 'doctor_invites',
+};
