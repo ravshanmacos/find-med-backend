@@ -13,13 +13,14 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AcceptDoctorInviteDto } from './dto/accept-doctor-invite.dto';
+import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { JwtAuthGuard } from '../config/guards/jwt-auth.guard';
 import { RolesGuard } from '../config/guards/roles.guard';
 import { Roles } from '../config/decorators/roles.decorator';
 
 // Note: register/login/refresh/logout/accept-invite are intentionally
-// unguarded — they must be reachable without authentication. Only
-// invite creation is restricted to ADMIN.
+// unguarded — they must be reachable without authentication. Doctor
+// creation and invite issuance are restricted to ADMIN.
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -45,6 +46,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   logout(@Body() dto: RefreshTokenDto) {
     return this.authService.logout(dto.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Post('doctors')
+  createDoctor(@Body() dto: CreateDoctorDto) {
+    return this.authService.createDoctorWithInvite(dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

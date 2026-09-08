@@ -15,6 +15,7 @@ import { DoctorInvitesDao } from './dao/doctor-invites.dao';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AcceptDoctorInviteDto } from './dto/accept-doctor-invite.dto';
+import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { AuthTokens, JwtPayload } from './interfaces/jwt-payload.interface';
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN ?? '20m';
@@ -136,8 +137,28 @@ export class AuthService {
   }
 
   /**
-   * Called by an admin. Returns the raw invite token — the admin sends it
-   * to the doctor themselves (email/SMS — out of scope for now).
+   * Called by an admin: creates a new Doctor record AND generates its
+   * invite in the same request — one round trip instead of two.
+   */
+  createDoctorWithInvite(
+    dto: CreateDoctorDto,
+  ): Promise<{ doctorId: string; inviteToken: string; expiresAt: Date }> {
+    return wrapInTransaction(this.poolService.pool, async (client) => {
+      const doctor = await this.doctorsDao.insert(client, {
+        full_name: dto.fullName,
+        bio: dto.bio ?? null,
+        experience_years: dto.experienceYears ?? null,
+      });
+
+      const invite = await this.generateInvite(client, doctor.id);
+
+      return { doctorId: doctor.id, ...invite };
+    });
+  }
+
+  /**
+   * Called by an admin. Re-issues an invite for an existing (but not yet
+   * linked) doctor — e.g. when the old invite has expired.
    */
   createDoctorInvite(
     doctorId: string,
@@ -159,19 +180,7 @@ export class AuthService {
         );
       }
 
-      const rawInviteToken = crypto.randomBytes(48).toString('hex');
-      const tokenHash = this.hashToken(rawInviteToken);
-      const expiresAt = new Date(
-        Date.now() + this.parseExpiryToMs(DOCTOR_INVITE_EXPIRES_IN),
-      );
-
-      await this.doctorInvitesDao.insert(client, {
-        doctor_id: doctorId,
-        token_hash: tokenHash,
-        expires_at: expiresAt,
-      });
-
-      return { inviteToken: rawInviteToken, expiresAt };
+      return this.generateInvite(client, doctorId);
     });
   }
 
@@ -234,6 +243,31 @@ export class AuthService {
 
       return this.issueTokens(client, user.id, user.role);
     });
+  }
+
+  /**
+   * Creates an invite row (hash stored) for doctorId and returns the raw
+   * token. Callers (createDoctorWithInvite / createDoctorInvite) are
+   * responsible for checking beforehand that the doctor exists and isn't
+   * already linked.
+   */
+  private async generateInvite(
+    client: Queryable,
+    doctorId: string,
+  ): Promise<{ inviteToken: string; expiresAt: Date }> {
+    const rawInviteToken = crypto.randomBytes(48).toString('hex');
+    const tokenHash = this.hashToken(rawInviteToken);
+    const expiresAt = new Date(
+      Date.now() + this.parseExpiryToMs(DOCTOR_INVITE_EXPIRES_IN),
+    );
+
+    await this.doctorInvitesDao.insert(client, {
+      doctor_id: doctorId,
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+    });
+
+    return { inviteToken: rawInviteToken, expiresAt };
   }
 
   private async issueTokens(
