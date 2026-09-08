@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
+import { Role } from '../../common/principal';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 // Note: this guard must run AFTER JwtAuthGuard, since req.user is
@@ -15,9 +15,10 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<
-      JwtPayload['role'][]
-    >(ROLES_KEY, [context.getHandler(), context.getClass()]);
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;

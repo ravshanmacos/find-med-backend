@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { Principal } from '../../common/principal';
+import { PoolService } from '../../core/pool.service';
+import { UsersDao } from '../dao/users.dao';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(
+    private readonly poolService: PoolService,
+    private readonly usersDao: UsersDao,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,8 +19,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // The returned object is attached to the request as req.user
-  validate(payload: JwtPayload) {
-    return { userId: payload.sub, role: payload.role };
+  // Runs on every protected request — even with a validly signed token,
+  // re-checks that the user still exists and is active in the database.
+  async validate(payload: JwtPayload): Promise<Principal> {
+    const user = await this.usersDao.findOne(
+      this.poolService.pool,
+      payload.sub,
+    );
+
+    if (!user || !user.is_active) {
+      throw new UnauthorizedException();
+    }
+
+    return new Principal(user.id, user.role, user.email);
   }
 }

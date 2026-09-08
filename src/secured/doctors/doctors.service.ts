@@ -6,9 +6,7 @@ import { ERROR_MESSAGES } from '../../common/messages/error-messages';
 import { DoctorException } from '../../common/exceptions/doctor.exceptions';
 import { DoctorsDao } from './doctors.dao';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
-import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-
-type RequestingUser = { userId: string; role: JwtPayload['role'] };
+import { Principal } from '../../common/principal';
 
 @Injectable()
 export class DoctorsService extends BaseService {
@@ -33,7 +31,7 @@ export class DoctorsService extends BaseService {
   updateProfile(
     doctorId: string,
     dto: UpdateDoctorDto,
-    requestingUser: RequestingUser,
+    requestingUser: Principal,
   ) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
       const doctor = await this.doctorsDao.findOne(client, doctorId);
