@@ -18,7 +18,7 @@ export const AddSwaggerDocumentation = async (app: INestApplication) => {
     expressBasicAuth({
       challenge: true,
       users: {
-        ravshan: '2105',
+        [process.env.SWAGGER_USER!]: process.env.SWAGGER_PASSWORD!,
       },
     }),
   );
