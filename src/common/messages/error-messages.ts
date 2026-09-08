@@ -48,4 +48,14 @@ export const ERROR_MESSAGES = {
     ru: 'Вы можете редактировать только свой профиль',
     uz: "Siz faqat o'z profilingizni tahrirlay olasiz",
   },
+  SPECIALTY_ALREADY_EXISTS: {
+    en: 'This specialty already exists',
+    ru: 'Эта специальность уже существует',
+    uz: "Bu yo'nalish allaqachon mavjud",
+  },
+  SPECIALTY_NOT_FOUND: {
+    en: 'Specialty not found',
+    ru: 'Специальность не найдена',
+    uz: "Yo'nalish topilmadi",
+  },
 };

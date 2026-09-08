@@ -13,4 +13,6 @@ export const tableNames = {
   doctors: 'doctors',
   refreshTokens: 'refresh_tokens',
   doctorInvites: 'doctor_invites',
+  specialties: 'specialties',
+  doctorSpecialties: 'doctor_specialties',
 };
