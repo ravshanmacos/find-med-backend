@@ -15,4 +15,6 @@ export const tableNames = {
   doctorInvites: 'doctor_invites',
   specialties: 'specialties',
   doctorSpecialties: 'doctor_specialties',
+  workplaces: 'workplaces',
+  doctorWorkplaces: 'doctor_workplaces',
 };

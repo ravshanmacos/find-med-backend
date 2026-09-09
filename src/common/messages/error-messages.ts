@@ -58,4 +58,9 @@ export const ERROR_MESSAGES = {
     ru: 'Специальность не найдена',
     uz: "Yo'nalish topilmadi",
   },
+  WORKPLACE_NOT_FOUND: {
+    en: 'Workplace not found',
+    ru: 'Место работы не найдено',
+    uz: 'Ish joyi topilmadi',
+  },
 };
