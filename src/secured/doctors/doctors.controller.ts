@@ -14,6 +14,7 @@ import {
 import { DoctorsService } from './providers/doctors.service';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { AssignSpecialtyDto } from './dto/assign-specialty.dto';
+import { AssignWorkplaceDto } from './dto/assign-workplace.dto';
 import { JwtAuthGuard } from '../../config/guards/jwt-auth.guard';
 import { RolesGuard } from '../../config/guards/roles.guard';
 import { Roles } from '../../config/decorators/roles.decorator';
@@ -43,7 +44,7 @@ export class DoctorsController {
 
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.doctorsService.findOneWithSpecialties(id);
+    return this.doctorsService.findOneDetailed(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -77,5 +78,27 @@ export class DoctorsController {
     @CurrentUser() user: Principal,
   ) {
     return this.doctorsService.unassignSpecialty(id, specialtyId, user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'DOCTOR')
+  @Post(':id/workplaces')
+  assignWorkplace(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AssignWorkplaceDto,
+    @CurrentUser() user: Principal,
+  ) {
+    return this.doctorsService.assignWorkplace(id, dto, user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'DOCTOR')
+  @Delete(':id/workplaces/:workplaceId')
+  unassignWorkplace(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('workplaceId', ParseUUIDPipe) workplaceId: string,
+    @CurrentUser() user: Principal,
+  ) {
+    return this.doctorsService.unassignWorkplace(id, workplaceId, user);
   }
 }

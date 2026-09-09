@@ -7,9 +7,12 @@ import { DoctorException } from '../../../common/exceptions/doctor.exceptions';
 import { DoctorsDao } from './doctors.dao';
 import { UpdateDoctorDto } from '../dto/update-doctor.dto';
 import { AssignSpecialtyDto } from '../dto/assign-specialty.dto';
+import { AssignWorkplaceDto } from '../dto/assign-workplace.dto';
 import { Principal } from '../../../common/principal';
 import { SpecialtiesDao } from '../../specialties/providers/specialties.dao';
-import { DoctorSpecialtiesDao } from '../../specialties/providers/doctor-specialties.dao';
+import { DoctorSpecialtiesDao } from './doctor-specialties.dao';
+import { WorkplacesDao } from '../../workplaces/providers/workplaces.dao';
+import { DoctorWorkplacesDao } from './doctor-workplaces.dao';
 
 @Injectable()
 export class DoctorsService extends BaseService {
@@ -18,6 +21,8 @@ export class DoctorsService extends BaseService {
     private readonly doctorsDao: DoctorsDao,
     private readonly specialtiesDao: SpecialtiesDao,
     private readonly doctorSpecialtiesDao: DoctorSpecialtiesDao,
+    private readonly workplacesDao: WorkplacesDao,
+    private readonly doctorWorkplacesDao: DoctorWorkplacesDao,
   ) {
     super(poolService, doctorsDao);
   }
@@ -37,7 +42,7 @@ export class DoctorsService extends BaseService {
     );
   }
 
-  async findOneWithSpecialties(id: string) {
+  async findOneDetailed(id: string) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
       const doctor = await this.doctorsDao.findOne(client, id);
 
@@ -45,10 +50,12 @@ export class DoctorsService extends BaseService {
         return null;
       }
 
-      const specialties =
-        await this.doctorSpecialtiesDao.findSpecialtiesForDoctor(client, id);
+      const [specialties, workplaces] = await Promise.all([
+        this.doctorSpecialtiesDao.findSpecialtiesForDoctor(client, id),
+        this.doctorWorkplacesDao.findWorkplacesForDoctor(client, id),
+      ]);
 
-      return { ...doctor, specialties };
+      return { ...doctor, specialties, workplaces };
     });
   }
 
@@ -131,6 +138,64 @@ export class DoctorsService extends BaseService {
       await this.doctorSpecialtiesDao.unassign(client, doctor.id, specialtyId);
 
       return this.doctorSpecialtiesDao.findSpecialtiesForDoctor(
+        client,
+        doctor.id,
+      );
+    });
+  }
+
+  assignWorkplace(
+    doctorId: string,
+    dto: AssignWorkplaceDto,
+    requestingUser: Principal,
+  ) {
+    return wrapInTransaction(this.poolService.pool, async (client) => {
+      const doctor = await this.assertCanManage(
+        client,
+        doctorId,
+        requestingUser,
+      );
+
+      const workplace = await this.workplacesDao.findOne(
+        client,
+        dto.workplaceId,
+      );
+
+      if (!workplace) {
+        throw new DoctorException(
+          ERROR_MESSAGES.WORKPLACE_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await this.doctorWorkplacesDao.assign(
+        client,
+        doctor.id,
+        dto.workplaceId,
+      );
+
+      return this.doctorWorkplacesDao.findWorkplacesForDoctor(
+        client,
+        doctor.id,
+      );
+    });
+  }
+
+  unassignWorkplace(
+    doctorId: string,
+    workplaceId: string,
+    requestingUser: Principal,
+  ) {
+    return wrapInTransaction(this.poolService.pool, async (client) => {
+      const doctor = await this.assertCanManage(
+        client,
+        doctorId,
+        requestingUser,
+      );
+
+      await this.doctorWorkplacesDao.unassign(client, doctor.id, workplaceId);
+
+      return this.doctorWorkplacesDao.findWorkplacesForDoctor(
         client,
         doctor.id,
       );
