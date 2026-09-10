@@ -13,4 +13,12 @@ export class UpdateDoctorDto {
   @IsInt()
   @Min(0)
   experienceYears?: number;
+
+  @IsOptional()
+  @IsInt()
+  regionId?: number;
+
+  @IsOptional()
+  @IsInt()
+  districtId?: number;
 }

@@ -31,12 +31,16 @@ export class DoctorsController {
   search(
     @Query('search') search?: string,
     @Query('specialtyId') specialtyId?: string,
+    @Query('regionId') regionId?: string,
+    @Query('districtId') districtId?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
     return this.doctorsService.search(
       search,
       specialtyId ? Number(specialtyId) : undefined,
+      regionId ? Number(regionId) : undefined,
+      districtId ? Number(districtId) : undefined,
       limit ? Number(limit) : undefined,
       offset ? Number(offset) : undefined,
     );

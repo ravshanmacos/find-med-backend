@@ -1,0 +1,69 @@
+{
+  "regions": [
+    {
+      "name": "Toshkent shahri",
+      "districts": []
+    },
+    {
+      "name": "Toshkent viloyati",
+      "districts": []
+    },
+    {
+      "name": "Andijon viloyati",
+      "districts": [
+        "Andijon tumani", "Andijon shahri", "Xonobod shahri", "Asaka",
+        "Baliqchi", "Bo'z", "Buloqboshi", "Jalaquduq", "Izboskan",
+        "Qo'rg'ontepa", "Marhamat", "Oltinko'l", "Paxtaobod", "Shahrixon",
+        "Ulug'nor", "Xo'jaobod", "Qorasuv shahri"
+      ]
+    },
+    {
+      "name": "Buxoro viloyati",
+      "districts": []
+    },
+    {
+      "name": "Farg'ona viloyati",
+      "districts": []
+    },
+    {
+      "name": "Jizzax viloyati",
+      "districts": []
+    },
+    {
+      "name": "Xorazm viloyati",
+      "districts": []
+    },
+    {
+      "name": "Namangan viloyati",
+      "districts": []
+    },
+    {
+      "name": "Navoiy viloyati",
+      "districts": []
+    },
+    {
+      "name": "Qashqadaryo viloyati",
+      "districts": []
+    },
+    {
+      "name": "Qoraqalpog'iston Respublikasi",
+      "districts": [
+        "Nukus shahri", "Amudaryo", "Beruniy", "Kegeyli", "Qonliko'l",
+        "Qorao'zak", "Qo'ng'irot", "Mo'ynoq", "Nukus tumani", "Taxtako'pir",
+        "To'rtko'l", "Xo'jayli", "Chimboy", "Sho'manoy", "Ellikqal'a"
+      ]
+    },
+    {
+      "name": "Samarqand viloyati",
+      "districts": []
+    },
+    {
+      "name": "Sirdaryo viloyati",
+      "districts": []
+    },
+    {
+      "name": "Surxondaryo viloyati",
+      "districts": []
+    }
+  ]
+}

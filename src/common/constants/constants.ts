@@ -17,4 +17,6 @@ export const tableNames = {
   doctorSpecialties: 'doctor_specialties',
   workplaces: 'workplaces',
   doctorWorkplaces: 'doctor_workplaces',
+  regions: 'regions',
+  districts: 'districts',
 };

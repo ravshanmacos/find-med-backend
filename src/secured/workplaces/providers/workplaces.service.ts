@@ -17,10 +17,18 @@ export class WorkplacesService extends BaseService {
     super(poolService, workplacesDao);
   }
 
-  search(search?: string, limit?: number, offset?: number) {
+  search(
+    search?: string,
+    regionId?: number,
+    districtId?: number,
+    limit?: number,
+    offset?: number,
+  ) {
     return this.workplacesDao.searchByName(
       this.poolService.pool,
       search,
+      regionId,
+      districtId,
       limit,
       offset,
     );
@@ -31,6 +39,8 @@ export class WorkplacesService extends BaseService {
       name: dto.name,
       address: dto.address ?? null,
       phone: dto.phone ?? null,
+      region_id: dto.regionId ?? null,
+      district_id: dto.districtId ?? null,
     });
   }
 
@@ -49,6 +59,8 @@ export class WorkplacesService extends BaseService {
       if (dto.name !== undefined) values.name = dto.name;
       if (dto.address !== undefined) values.address = dto.address;
       if (dto.phone !== undefined) values.phone = dto.phone;
+      if (dto.regionId !== undefined) values.region_id = dto.regionId;
+      if (dto.districtId !== undefined) values.district_id = dto.districtId;
 
       const [updated] = await this.workplacesDao.update(client, values, {
         id,

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateWorkplaceDto {
   @IsString()
@@ -12,4 +12,12 @@ export class CreateWorkplaceDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @IsOptional()
+  @IsInt()
+  regionId?: number;
+
+  @IsOptional()
+  @IsInt()
+  districtId?: number;
 }

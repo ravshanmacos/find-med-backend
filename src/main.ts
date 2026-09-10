@@ -3,7 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import process from 'process';
 import cors from 'cors';
-import { migrate } from './core/base.dao';
+import { migrate, seed } from './core/base.dao';
 import { AddSwaggerDocumentation } from './add-swagger-documentation';
 
 async function bootstrap() {
@@ -28,3 +28,4 @@ async function bootstrap() {
 }
 migrate().then(() => bootstrap());
 // bootstrap();
+// seed().then(() => bootstrap());

@@ -30,6 +30,8 @@ export class DoctorsService extends BaseService {
   search(
     search?: string,
     specialtyId?: number,
+    regionId?: number,
+    districtId?: number,
     limit?: number,
     offset?: number,
   ) {
@@ -37,6 +39,8 @@ export class DoctorsService extends BaseService {
       this.poolService.pool,
       search,
       specialtyId,
+      regionId,
+      districtId,
       limit,
       offset,
     );
@@ -77,6 +81,8 @@ export class DoctorsService extends BaseService {
       if (dto.experienceYears !== undefined) {
         values.experience_years = dto.experienceYears;
       }
+      if (dto.regionId !== undefined) values.region_id = dto.regionId;
+      if (dto.districtId !== undefined) values.district_id = dto.districtId;
 
       const [updated] = await this.doctorsDao.update(client, values, {
         id: doctor.id,

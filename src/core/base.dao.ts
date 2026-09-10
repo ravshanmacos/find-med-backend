@@ -27,6 +27,10 @@ export const migrate = async (): Promise<any> => {
   return Knex(knexConfig).migrate.latest();
 };
 
+export const seed = async (): Promise<any> => {
+  return Knex(knexConfig).seed.run();
+};
+
 interface BaseDaoFields {
   whereInParams: WhereInParamsType[] | null;
 }

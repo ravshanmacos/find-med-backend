@@ -9,10 +9,12 @@ export class WorkplacesDao extends BaseDao {
     super(tableNames.workplaces);
   }
 
-  // Partial name match (ILIKE) + pagination.
+  // Partial name match (ILIKE) + optional region/district filters + pagination.
   searchByName(
     queryable: Queryable,
     search?: string,
+    regionId?: number,
+    districtId?: number,
     limit = 20,
     offset = 0,
   ) {
@@ -20,6 +22,14 @@ export class WorkplacesDao extends BaseDao {
 
     if (search) {
       query = query.whereILike('name', `%${search}%`);
+    }
+
+    if (regionId) {
+      query = query.where('region_id', regionId);
+    }
+
+    if (districtId) {
+      query = query.where('district_id', districtId);
     }
 
     query = query.orderBy('name', 'asc').limit(limit).offset(offset);

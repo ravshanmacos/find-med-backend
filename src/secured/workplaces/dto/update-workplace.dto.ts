@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UpdateWorkplaceDto {
   @IsOptional()
@@ -13,4 +13,12 @@ export class UpdateWorkplaceDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @IsOptional()
+  @IsInt()
+  regionId?: number;
+
+  @IsOptional()
+  @IsInt()
+  districtId?: number;
 }
