@@ -33,4 +33,7 @@ export const knexConfig: Knex.Config = {
   migrations: {
     directory: './migrations',
   },
+  seeds: {
+    directory: './seeds',
+  },
 };

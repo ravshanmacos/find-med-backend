@@ -9,11 +9,13 @@ export class DoctorsDao extends BaseDao {
     super(tableNames.doctors);
   }
 
-  // Partial name match (ILIKE) + optional specialty filter + pagination.
+  // Partial name match (ILIKE) + optional specialty/region/district filters + pagination.
   searchByName(
     queryable: Queryable,
     search?: string,
     specialtyId?: number,
+    regionId?: number,
+    districtId?: number,
     limit = 20,
     offset = 0,
   ) {
@@ -31,6 +33,14 @@ export class DoctorsDao extends BaseDao {
 
     if (search) {
       query = query.whereILike(`${this.tableName}.full_name`, `%${search}%`);
+    }
+
+    if (regionId) {
+      query = query.where(`${this.tableName}.region_id`, regionId);
+    }
+
+    if (districtId) {
+      query = query.where(`${this.tableName}.district_id`, districtId);
     }
 
     query = query

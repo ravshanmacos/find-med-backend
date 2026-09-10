@@ -25,11 +25,15 @@ export class WorkplacesController {
   @Get()
   search(
     @Query('search') search?: string,
+    @Query('regionId') regionId?: string,
+    @Query('districtId') districtId?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
     return this.workplacesService.search(
       search,
+      regionId ? Number(regionId) : undefined,
+      districtId ? Number(districtId) : undefined,
       limit ? Number(limit) : undefined,
       offset ? Number(offset) : undefined,
     );

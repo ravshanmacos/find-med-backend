@@ -7,6 +7,7 @@ import { DoctorsModule } from './secured/doctors/doctors.module';
 import { PatientsModule } from './secured/patients/patients.module';
 import { SpecialtiesModule } from './secured/specialties/specialties.module';
 import { WorkplacesModule } from './secured/workplaces/workplaces.module';
+import { RegionsModule } from './secured/regions/regions.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { WorkplacesModule } from './secured/workplaces/workplaces.module';
     PatientsModule,
     SpecialtiesModule,
     WorkplacesModule,
+    RegionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

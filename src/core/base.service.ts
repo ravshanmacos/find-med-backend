@@ -68,6 +68,12 @@ export class BaseService {
     });
   }
 
+  delete(where: Record<string, any>) {
+    return wrapInTransaction(this.poolService.pool, (poolClient) => {
+      return this.dao.delete(poolClient, where);
+    });
+  }
+
   getAllByIds(ids: any[], client: Queryable = this.poolService.pool) {
     return this.dao.findAllByIds(client, ids);
   }
@@ -102,12 +108,6 @@ export class BaseService {
     ids: UUID[],
   ) {
     return this.dao.updateByIds(client, values, ids);
-  }
-
-  delete(where: Record<string, any>) {
-    return wrapInTransaction(this.poolService.pool, (poolClient) => {
-      return this.dao.delete(poolClient, where);
-    });
   }
 
   findPage(
