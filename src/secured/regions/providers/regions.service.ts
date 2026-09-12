@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BaseService } from '../../core/base.service';
-import { PoolService } from '../../core/pool.service';
+import { BaseService } from 'src/core/base.service';
+import { PoolService } from 'src/core/pool.service';
 import { RegionsDao } from './regions.dao';
 import { DistrictsDao } from './districts.dao';
 

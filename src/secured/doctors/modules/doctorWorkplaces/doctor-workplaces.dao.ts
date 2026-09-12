@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDao } from '../../../core/base.dao';
-import { tableNames, Queryable } from '../../../common/constants/constants';
-import { getRows, runKnex } from '../../../utils';
+import { BaseDao } from '../../../../core/base.dao';
+import { tableNames, Queryable } from '../../../../common/constants/constants';
+import { getRows, runKnex } from '../../../../utils';
+import { QueryResultRow } from 'pg';
 
 @Injectable()
-export class DoctorWorkplacesDao extends BaseDao {
+export class DoctorWorkplacesDao<T extends QueryResultRow> extends BaseDao<T> {
   constructor() {
     super(tableNames.doctorWorkplaces);
   }
@@ -24,7 +25,7 @@ export class DoctorWorkplacesDao extends BaseDao {
       .where({ doctor_id: doctorId, workplace_id: workplaceId })
       .del();
 
-    return runKnex(queryable, query);
+    return runKnex<T>(queryable, query);
   }
 
   // All workplaces assigned to a doctor, as full objects.
@@ -41,6 +42,6 @@ export class DoctorWorkplacesDao extends BaseDao {
       .where(`${this.tableName}.doctor_id`, doctorId)
       .orderBy('workplaces.name', 'asc');
 
-    return getRows(runKnex(queryable, query));
+    return getRows<T>(runKnex<T>(queryable, query));
   }
 }

@@ -1,30 +1,33 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { BaseService } from '../../../core/base.service';
-import { PoolService } from '../../../core/pool.service';
-import { wrapInTransaction } from '../../../utils';
-import { ERROR_MESSAGES } from '../../../common/messages/error-messages';
-import { DoctorException } from '../../../common/exceptions/doctor.exceptions';
+import { PoolService } from 'src/core/pool.service';
+import { wrapInTransaction } from 'src/utils';
+import { ERROR_MESSAGES } from 'src/common/messages/error-messages';
+import { DoctorException } from 'src/common/exceptions/doctor.exceptions';
+import { Principal } from 'src/common/principal';
 import { DoctorsDao } from './doctors.dao';
 import { UpdateDoctorDto } from '../dto/update-doctor.dto';
 import { AssignSpecialtyDto } from '../dto/assign-specialty.dto';
 import { AssignWorkplaceDto } from '../dto/assign-workplace.dto';
-import { Principal } from '../../../common/principal';
-import { SpecialtiesDao } from '../../specialties/providers/specialties.dao';
-import { DoctorSpecialtiesDao } from './doctor-specialties.dao';
-import { WorkplacesDao } from '../../workplaces/providers/workplaces.dao';
-import { DoctorWorkplacesDao } from './doctor-workplaces.dao';
+import { GenericService } from '../../../core/generic.service';
+import { Doctor } from '../models/doctor.model';
+import { SpecialtiesService } from '../../specialties/providers/specialties.service';
+import { DoctorSpecialtiesService } from '../modules/doctorSpecialties/doctor-specialties.service';
+import { WorkplacesService } from '../../workplaces/providers/workplaces.service';
+import { DoctorWorkplacesService } from '../modules/doctorWorkplaces/doctor-workplaces.service';
+import { PoolClient } from 'pg';
+import { UUID } from '../../../common/types';
 
 @Injectable()
-export class DoctorsService extends BaseService {
+export class DoctorsService extends GenericService<Doctor> {
   constructor(
     poolService: PoolService,
-    private readonly doctorsDao: DoctorsDao,
-    private readonly specialtiesDao: SpecialtiesDao,
-    private readonly doctorSpecialtiesDao: DoctorSpecialtiesDao,
-    private readonly workplacesDao: WorkplacesDao,
-    private readonly doctorWorkplacesDao: DoctorWorkplacesDao,
+    protected readonly dao: DoctorsDao<Doctor>,
+    protected readonly specialtiesService: SpecialtiesService,
+    protected readonly doctorSpecialtiesService: DoctorSpecialtiesService,
+    protected readonly workplacesService: WorkplacesService,
+    protected readonly doctorWorkplacesService: DoctorWorkplacesService,
   ) {
-    super(poolService, doctorsDao);
+    super(poolService, dao);
   }
 
   search(
@@ -35,7 +38,7 @@ export class DoctorsService extends BaseService {
     limit?: number,
     offset?: number,
   ) {
-    return this.doctorsDao.searchByName(
+    return this.dao.searchByName(
       this.poolService.pool,
       search,
       specialtyId,
@@ -48,15 +51,15 @@ export class DoctorsService extends BaseService {
 
   async findOneDetailed(id: string) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const doctor = await this.doctorsDao.findOne(client, id);
+      const doctor = await this.checkForExistByIdWithPool(client, id);
 
       if (!doctor) {
         return null;
       }
 
       const [specialties, workplaces] = await Promise.all([
-        this.doctorSpecialtiesDao.findSpecialtiesForDoctor(client, id),
-        this.doctorWorkplacesDao.findWorkplacesForDoctor(client, id),
+        this.doctorSpecialtiesService.findSpecialtiesForDoctor(client, id),
+        this.doctorWorkplacesService.findWorkplacesForDoctor(client, id),
       ]);
 
       return { ...doctor, specialties, workplaces };
@@ -69,11 +72,8 @@ export class DoctorsService extends BaseService {
     requestingUser: Principal,
   ) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const doctor = await this.assertCanManage(
-        client,
-        doctorId,
-        requestingUser,
-      );
+      const doctor = await this.checkForExistByIdWithPool(client, doctorId);
+      this.checkPrivilage(doctor, requestingUser);
 
       const values: Record<string, any> = {};
       if (dto.fullName !== undefined) values.full_name = dto.fullName;
@@ -84,7 +84,7 @@ export class DoctorsService extends BaseService {
       if (dto.regionId !== undefined) values.region_id = dto.regionId;
       if (dto.districtId !== undefined) values.district_id = dto.districtId;
 
-      const [updated] = await this.doctorsDao.update(client, values, {
+      const [updated] = await this.dao.update(client, values, {
         id: doctor.id,
       });
 
@@ -98,31 +98,21 @@ export class DoctorsService extends BaseService {
     requestingUser: Principal,
   ) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const doctor = await this.assertCanManage(
-        client,
-        doctorId,
-        requestingUser,
-      );
+      const doctor = await this.checkForExistByIdWithPool(client, doctorId);
+      this.checkPrivilage(doctor, requestingUser);
 
-      const specialty = await this.specialtiesDao.findOne(
+      const specialty = await this.specialtiesService.checkForExistByIdWithPool(
         client,
         dto.specialtyId,
       );
 
-      if (!specialty) {
-        throw new DoctorException(
-          ERROR_MESSAGES.SPECIALTY_NOT_FOUND,
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      await this.doctorSpecialtiesDao.assign(
+      await this.doctorSpecialtiesService.assign(
         client,
         doctor.id,
-        dto.specialtyId,
+        specialty.id,
       );
 
-      return this.doctorSpecialtiesDao.findSpecialtiesForDoctor(
+      return this.doctorSpecialtiesService.findSpecialtiesForDoctor(
         client,
         doctor.id,
       );
@@ -135,15 +125,16 @@ export class DoctorsService extends BaseService {
     requestingUser: Principal,
   ) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const doctor = await this.assertCanManage(
+      const doctor = await this.checkForExistByIdWithPool(client, doctorId);
+      this.checkPrivilage(doctor, requestingUser);
+
+      await this.doctorSpecialtiesService.unassign(
         client,
-        doctorId,
-        requestingUser,
+        doctor.id,
+        specialtyId,
       );
 
-      await this.doctorSpecialtiesDao.unassign(client, doctor.id, specialtyId);
-
-      return this.doctorSpecialtiesDao.findSpecialtiesForDoctor(
+      return this.doctorSpecialtiesService.findSpecialtiesForDoctor(
         client,
         doctor.id,
       );
@@ -156,31 +147,20 @@ export class DoctorsService extends BaseService {
     requestingUser: Principal,
   ) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const doctor = await this.assertCanManage(
-        client,
-        doctorId,
-        requestingUser,
-      );
+      const doctor = await this.checkForExistByIdWithPool(client, doctorId);
+      this.checkPrivilage(doctor, requestingUser);
 
-      const workplace = await this.workplacesDao.findOne(
+      const workplace = await this.workplacesService.checkForExistByIdWithPool(
         client,
         dto.workplaceId,
       );
 
-      if (!workplace) {
-        throw new DoctorException(
-          ERROR_MESSAGES.WORKPLACE_NOT_FOUND,
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      await this.doctorWorkplacesDao.assign(
+      await this.doctorWorkplacesService.assign(
         client,
         doctor.id,
-        dto.workplaceId,
+        workplace.id,
       );
-
-      return this.doctorWorkplacesDao.findWorkplacesForDoctor(
+      return this.doctorWorkplacesService.findWorkplacesForDoctor(
         client,
         doctor.id,
       );
@@ -193,36 +173,29 @@ export class DoctorsService extends BaseService {
     requestingUser: Principal,
   ) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const doctor = await this.assertCanManage(
+      const doctor = await this.checkForExistByIdWithPool(client, doctorId);
+      this.checkPrivilage(doctor, requestingUser);
+
+      await this.doctorWorkplacesService.unassign(
         client,
-        doctorId,
-        requestingUser,
+        doctor.id,
+        workplaceId,
       );
 
-      await this.doctorWorkplacesDao.unassign(client, doctor.id, workplaceId);
-
-      return this.doctorWorkplacesDao.findWorkplacesForDoctor(
+      return this.doctorWorkplacesService.findWorkplacesForDoctor(
         client,
         doctor.id,
       );
     });
   }
 
-  // Checks the doctor exists and requestingUser may manage it (ADMIN or
-  // the doctor themselves). Returns the found doctor row.
-  private async assertCanManage(
-    client: Parameters<DoctorsDao['findOne']>[0],
-    doctorId: string,
-    requestingUser: Principal,
-  ) {
-    const doctor = await this.doctorsDao.findOne(client, doctorId);
-
-    if (!doctor) {
+  private checkPrivilage(doctor: Doctor, requestingUser: Principal) {
+    if (!doctor.user_id)
       throw new DoctorException(
-        ERROR_MESSAGES.DOCTOR_NOT_FOUND,
+        ERROR_MESSAGES.NOT_FOUND,
         HttpStatus.NOT_FOUND,
+        'user_id',
       );
-    }
 
     const isAdmin = requestingUser.role === 'ADMIN';
     const isOwner = doctor.user_id === requestingUser.userId;
@@ -233,7 +206,9 @@ export class DoctorsService extends BaseService {
         HttpStatus.FORBIDDEN,
       );
     }
+  }
 
-    return doctor;
+  getDefaultColumns(): string[] | Record<string, any> {
+    return ['*'];
   }
 }

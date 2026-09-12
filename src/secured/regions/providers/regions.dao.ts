@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDao } from '../../core/base.dao';
-import { tableNames } from '../../common/constants/constants';
+import { BaseDao } from 'src/core/base.dao';
+import { tableNames } from 'src/common/constants/constants';
 
 @Injectable()
 export class RegionsDao extends BaseDao {

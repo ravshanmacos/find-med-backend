@@ -17,6 +17,7 @@ import { RegisterDto } from './dto/register.dto';
 import { AcceptDoctorInviteDto } from './dto/accept-doctor-invite.dto';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { AuthTokens, JwtPayload } from './interfaces/jwt-payload.interface';
+import { GenericService } from '../core/generic.service';
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN ?? '20m';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN ?? '30d';
@@ -24,7 +25,7 @@ const DOCTOR_INVITE_EXPIRES_IN = process.env.DOCTOR_INVITE_EXPIRES_IN ?? '7d';
 const SALT_ROUNDS = 10;
 
 @Injectable()
-export class AuthService {
+export class AuthService extends GenericService<any> {
   constructor(
     private readonly poolService: PoolService,
     private readonly usersDao: UsersDao,
@@ -37,7 +38,7 @@ export class AuthService {
 
   register(dto: RegisterDto): Promise<AuthTokens> {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const existing = await this.usersDao.findOneBy(client, {
+      const existing = await this.findOneByCondition(client, {
         email: dto.email,
       });
 

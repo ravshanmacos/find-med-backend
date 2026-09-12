@@ -12,14 +12,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DoctorsService } from './providers/doctors.service';
-import { UpdateDoctorDto } from './dto/update-doctor.dto';
-import { AssignSpecialtyDto } from './dto/assign-specialty.dto';
-import { AssignWorkplaceDto } from './dto/assign-workplace.dto';
-import { JwtAuthGuard } from '../../config/guards/jwt-auth.guard';
-import { RolesGuard } from '../../config/guards/roles.guard';
-import { Roles } from '../../config/decorators/roles.decorator';
-import { CurrentUser } from '../../config/decorators/current-user.decorator';
-import { Principal } from '../../common/principal';
+import { UpdateDoctorDto, AssignWorkplaceDto, AssignSpecialtyDto } from './dto';
+import { JwtAuthGuard, RolesGuard } from 'src/config/guards';
+import { Roles } from 'src/config/decorators/roles.decorator';
+import { CurrentUser } from 'src/config/decorators/current-user.decorator';
+import { Principal } from 'src/common/principal';
 
 // Note: the GET routes are intentionally unguarded — the discovery layer
 // must let patients browse doctors without logging in.

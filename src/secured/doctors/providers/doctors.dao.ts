@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDao } from '../../../core/base.dao';
-import { tableNames, Queryable } from '../../../common/constants/constants';
-import { getRows, runKnex } from '../../../utils';
+import { BaseDao } from 'src/core/base.dao';
+import { tableNames, Queryable } from 'src/common/constants/constants';
+import { getRows, runKnex } from 'src/utils';
+import { QueryResultRow } from 'pg';
 
 @Injectable()
-export class DoctorsDao extends BaseDao {
+export class DoctorsDao<T extends QueryResultRow> extends BaseDao<T> {
   constructor() {
     super(tableNames.doctors);
   }
@@ -48,6 +49,6 @@ export class DoctorsDao extends BaseDao {
       .limit(limit)
       .offset(offset);
 
-    return getRows(runKnex(queryable, query));
+    return getRows<T>(runKnex<T>(queryable, query));
   }
 }

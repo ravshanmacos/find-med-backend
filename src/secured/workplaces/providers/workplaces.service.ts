@@ -7,14 +7,20 @@ import { WorkplaceException } from '../../../common/exceptions/workplace.excepti
 import { WorkplacesDao } from './workplaces.dao';
 import { CreateWorkplaceDto } from '../dto/create-workplace.dto';
 import { UpdateWorkplaceDto } from '../dto/update-workplace.dto';
+import { GenericService } from '../../../core/generic.service';
+import { Workplace } from '../model/workplace.model';
 
 @Injectable()
-export class WorkplacesService extends BaseService {
+export class WorkplacesService extends GenericService<Workplace> {
   constructor(
     poolService: PoolService,
-    private readonly workplacesDao: WorkplacesDao,
+    private readonly workplacesDao: WorkplacesDao<Workplace>,
   ) {
     super(poolService, workplacesDao);
+  }
+
+  getDefaultColumns(): string[] | Record<string, any> {
+    throw new Error('Method not implemented.');
   }
 
   search(
@@ -46,14 +52,7 @@ export class WorkplacesService extends BaseService {
 
   updateOne(id: string, dto: UpdateWorkplaceDto) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
-      const existing = await this.workplacesDao.findOne(client, id);
-
-      if (!existing) {
-        throw new WorkplaceException(
-          ERROR_MESSAGES.WORKPLACE_NOT_FOUND,
-          HttpStatus.NOT_FOUND,
-        );
-      }
+      await this.checkForExistByIdWithPool(client, id);
 
       const values: Record<string, any> = {};
       if (dto.name !== undefined) values.name = dto.name;
@@ -62,7 +61,7 @@ export class WorkplacesService extends BaseService {
       if (dto.regionId !== undefined) values.region_id = dto.regionId;
       if (dto.districtId !== undefined) values.district_id = dto.districtId;
 
-      const [updated] = await this.workplacesDao.update(client, values, {
+      const [updated] = await this.update(values, {
         id,
       });
 
