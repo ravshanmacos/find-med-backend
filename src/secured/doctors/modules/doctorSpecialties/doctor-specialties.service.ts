@@ -4,8 +4,9 @@ import { PoolService } from 'src/core/pool.service';
 import { DoctorSpecialtiesDao } from './doctor-specialties.dao';
 import { Queryable } from 'src/common/constants/constants';
 import { UUID } from 'src/common/types';
-import { DoctorException } from '../../../../common/exceptions/doctor.exceptions';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class DoctorSpecialtiesService extends GenericService<DoctorSpecialtiesModel> {
   constructor(
     protected readonly pool: PoolService,

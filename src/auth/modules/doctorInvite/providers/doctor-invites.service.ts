@@ -1,3 +1,5 @@
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { GenericService } from 'src/core/generic.service';
 import { PoolService } from 'src/core/pool.service';
 import { Queryable } from 'src/common/constants/constants';
@@ -7,26 +9,22 @@ import { CreateDoctorDto } from 'src/auth/dto/create-doctor.dto';
 import { hashToken, parseExpiryToMs, wrapInTransaction } from 'src/utils';
 import { AuthException } from 'src/common/exceptions/auth.exceptions';
 import { ERROR_MESSAGES } from 'src/common/messages/error-messages';
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { AcceptDoctorInviteDto } from 'src/auth/dto/accept-doctor-invite.dto';
-import { AuthTokens } from 'src/auth/interfaces/jwt-payload.interface';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { DoctorsService } from 'src/secured/doctors/providers/doctors.service';
-import { RefreshTokenService } from '../../refreshTokens/providers/refresh-token.service';
 import { UsersService } from '../../users/providers/users.service';
-import { UUID } from '../../../../common/types';
+import { UUID } from 'src/common/types';
 
+@Injectable()
 export class DoctorInvitesService extends GenericService<DoctorInvite> {
-  private DOCTOR_INVITE_EXPIRES_IN =
+  private readonly DOCTOR_INVITE_EXPIRES_IN =
     process.env.DOCTOR_INVITE_EXPIRES_IN ?? '7d';
-  private SALT_ROUNDS = 10;
+  private readonly SALT_ROUNDS = 10;
   constructor(
     protected readonly pool: PoolService,
     protected readonly dao: DoctorInvitesDao<DoctorInvite>,
     protected readonly doctorService: DoctorsService,
     protected readonly usersService: UsersService,
-    protected readonly refreshTokenService: RefreshTokenService,
   ) {
     super(pool, dao);
   }
@@ -63,7 +61,7 @@ export class DoctorInvitesService extends GenericService<DoctorInvite> {
     });
   }
 
-  acceptDoctorInvite(dto: AcceptDoctorInviteDto): Promise<AuthTokens> {
+  acceptDoctorInvite(dto: AcceptDoctorInviteDto) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
       const tokenHash = hashToken(dto.token);
       const invite = await this.findValidByHash(client, tokenHash);
@@ -105,7 +103,7 @@ export class DoctorInvitesService extends GenericService<DoctorInvite> {
 
       await this.dao.update(client, { used_at: new Date() }, { id: invite.id });
 
-      return this.refreshTokenService.issueTokens(client, user.id, user.role);
+      return { client, user_id: user.id, user_role: user.role };
     });
   }
 

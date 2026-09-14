@@ -3,7 +3,9 @@ import { PoolService } from 'src/core/pool.service';
 import { Queryable } from 'src/common/constants/constants';
 import { District } from '../models/district.model';
 import { DistrictsDao } from './districts.dao';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class DistrictsService extends GenericService<District> {
   constructor(
     protected readonly pool: PoolService,

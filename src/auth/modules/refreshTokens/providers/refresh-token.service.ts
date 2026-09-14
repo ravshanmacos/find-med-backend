@@ -15,10 +15,13 @@ import { UsersService } from '../../users/providers/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { hashToken, parseExpiryToMs } from 'src/utils';
 import { UUID } from '../../../../common/types';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class RefreshTokenService extends GenericService<RefreshToken> {
-  private ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN ?? '20m';
-  private REFRESH_TOKEN_EXPIRES_IN =
+  private readonly ACCESS_TOKEN_EXPIRES_IN =
+    process.env.JWT_ACCESS_EXPIRES_IN ?? '20m';
+  private readonly REFRESH_TOKEN_EXPIRES_IN =
     process.env.JWT_REFRESH_EXPIRES_IN ?? '30d';
 
   constructor(

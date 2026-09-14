@@ -1,9 +1,6 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { BaseService } from '../../../core/base.service';
+import { Injectable } from '@nestjs/common';
 import { PoolService } from '../../../core/pool.service';
 import { wrapInTransaction } from '../../../utils';
-import { ERROR_MESSAGES } from '../../../common/messages/error-messages';
-import { WorkplaceException } from '../../../common/exceptions/workplace.exceptions';
 import { WorkplacesDao } from './workplaces.dao';
 import { CreateWorkplaceDto } from '../dto/create-workplace.dto';
 import { UpdateWorkplaceDto } from '../dto/update-workplace.dto';

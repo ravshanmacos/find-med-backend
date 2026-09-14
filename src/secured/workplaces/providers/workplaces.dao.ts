@@ -4,7 +4,6 @@ import { tableNames, Queryable } from '../../../common/constants/constants';
 import { getRows, runKnex } from '../../../utils';
 import { QueryResultRow } from 'pg';
 
-@Injectable()
 export class WorkplacesDao<T extends QueryResultRow> extends BaseDao<T> {
   constructor() {
     super(tableNames.workplaces);

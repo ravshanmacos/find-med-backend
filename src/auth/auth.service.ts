@@ -17,12 +17,23 @@ export class AuthService {
     protected readonly doctorInvitesService: DoctorInvitesService,
   ) {}
 
-  register(dto: RegisterRequest) {
-    return this.usersService.register(dto);
+  async register(dto: RegisterRequest) {
+    const { client, user_id, user_role } =
+      await this.usersService.register(dto);
+    return await this.refreshTokenService.issueTokens(
+      client,
+      user_id,
+      user_role,
+    );
   }
 
-  login(dto: LoginRequest) {
-    return this.usersService.login(dto);
+  async login(dto: LoginRequest) {
+    const { client, user_id, user_role } = await this.usersService.login(dto);
+    return await this.refreshTokenService.issueTokens(
+      client,
+      user_id,
+      user_role,
+    );
   }
 
   refresh(refreshToken: string) {
@@ -53,7 +64,9 @@ export class AuthService {
    * Called by the doctor. Validates the invite, creates a User, links
    * Doctor.user_id, then immediately logs them in.
    */
-  acceptDoctorInvite(dto: AcceptDoctorInviteDto) {
-    return this.doctorInvitesService.acceptDoctorInvite(dto);
+  async acceptDoctorInvite(dto: AcceptDoctorInviteDto) {
+    const { client, user_id, user_role } =
+      await this.doctorInvitesService.acceptDoctorInvite(dto);
+    return this.refreshTokenService.issueTokens(client, user_id, user_role);
   }
 }

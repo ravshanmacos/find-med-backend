@@ -1,30 +1,27 @@
 import { GenericService } from 'src/core/generic.service';
 import { PoolService } from 'src/core/pool.service';
-import { AuthTokens } from 'src/auth/interfaces/jwt-payload.interface';
 import { UsersDao } from './users.dao';
 import { RegisterRequest, LoginRequest, User } from '../models/user.model';
 import { wrapInTransaction } from 'src/utils';
 import { AuthException } from 'src/common/exceptions/auth.exceptions';
 import { ERROR_MESSAGES } from 'src/common/messages/error-messages';
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PatientsService } from 'src/secured/patients/providers/patients.service';
-import { RefreshTokenService } from '../../refreshTokens/providers/refresh-token.service';
 
-const SALT_ROUNDS = 10;
-
+@Injectable()
 export class UsersService extends GenericService<User> {
+  private readonly SALT_ROUNDS = 10;
+
   constructor(
     protected readonly pool: PoolService,
     protected readonly dao: UsersDao<User>,
     protected readonly patientsService: PatientsService,
-    protected readonly usersService: UsersService,
-    protected readonly refreshTokenService: RefreshTokenService,
   ) {
     super(pool, dao);
   }
 
-  register(dto: RegisterRequest): Promise<AuthTokens> {
+  register(dto: RegisterRequest) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
       const existing = await this.findOneBy(client, {
         email: dto.email,
@@ -37,9 +34,9 @@ export class UsersService extends GenericService<User> {
         );
       }
 
-      const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+      const passwordHash = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
 
-      const user = await this.usersService.insertWithPool(client, {
+      const user = await this.insertWithPool(client, {
         email: dto.email,
         password_hash: passwordHash,
         phone: dto.phone ?? null,
@@ -51,11 +48,11 @@ export class UsersService extends GenericService<User> {
         full_name: dto.fullName,
       });
 
-      return this.refreshTokenService.issueTokens(client, user.id, user.role);
+      return { client, user_id: user.id, user_role: user.role };
     });
   }
 
-  login(dto: LoginRequest): Promise<AuthTokens> {
+  login(dto: LoginRequest) {
     return wrapInTransaction(this.poolService.pool, async (client) => {
       const user = await this.dao.findOneBy(client, {
         email: dto.email,
@@ -80,8 +77,7 @@ export class UsersService extends GenericService<User> {
           HttpStatus.FORBIDDEN,
         );
       }
-
-      return this.refreshTokenService.issueTokens(client, user.id, user.role);
+      return { client, user_id: user.id, user_role: user.role };
     });
   }
 
