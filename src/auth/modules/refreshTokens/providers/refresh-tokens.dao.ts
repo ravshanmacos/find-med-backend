@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDao } from '../../core/base.dao';
-import { Queryable, tableNames } from '../../common/constants/constants';
-import { getFirstRow, runKnex } from '../../utils';
+import { BaseDao } from 'src/core/base.dao';
+import { Queryable, tableNames } from 'src/common/constants/constants';
+import { getFirstRow, runKnex } from 'src/utils';
+import { QueryResultRow } from 'pg';
 
 @Injectable()
-export class RefreshTokensDao extends BaseDao {
+export class RefreshTokensDao<T extends QueryResultRow> extends BaseDao<T> {
   constructor() {
     super(tableNames.refreshTokens);
   }
@@ -18,6 +19,6 @@ export class RefreshTokensDao extends BaseDao {
       .whereNull('revoked_at')
       .andWhere('expires_at', '>', this.knex.fn.now());
 
-    return getFirstRow(runKnex(queryable, query));
+    return getFirstRow<T>(runKnex<T>(queryable, query));
   }
 }

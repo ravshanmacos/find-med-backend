@@ -4,13 +4,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { Principal } from '../../common/principal';
 import { PoolService } from '../../core/pool.service';
-import { UsersDao } from '../dao/users.dao';
+import { UsersService } from '../modules/users/providers/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly poolService: PoolService,
-    private readonly usersDao: UsersDao,
+    private readonly usersService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   // Runs on every protected request — even with a validly signed token,
   // re-checks that the user still exists and is active in the database.
   async validate(payload: JwtPayload): Promise<Principal> {
-    const user = await this.usersDao.findOne(
+    const user = await this.usersService.checkForExistByIdWithPool(
       this.poolService.pool,
       payload.sub,
     );

@@ -12,9 +12,8 @@ import {
 import { WorkplacesService } from './providers/workplaces.service';
 import { CreateWorkplaceDto } from './dto/create-workplace.dto';
 import { UpdateWorkplaceDto } from './dto/update-workplace.dto';
-import { JwtAuthGuard } from '../../config/guards/jwt-auth.guard';
-import { RolesGuard } from '../../config/guards/roles.guard';
-import { Roles } from '../../config/decorators/roles.decorator';
+import { JwtAuthGuard, RolesGuard } from 'src/config/guards';
+import { Roles } from 'src/config/decorators/roles.decorator';
 
 // Note: GET routes are deliberately unguarded — the discovery layer must let
 // patients browse workplaces without logging in.

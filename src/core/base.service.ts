@@ -3,11 +3,12 @@ import { PoolService } from './pool.service';
 import { Queryable } from '../common/constants/constants';
 import { wrapInTransaction } from '../utils';
 import { Columns, UUID, WhereCondition } from '../common/types';
+import { QueryResultRow } from 'pg';
 
-export class BaseService {
+export class BaseService<T extends QueryResultRow> {
   constructor(
     protected readonly poolService: PoolService,
-    protected readonly dao: BaseDao,
+    protected readonly dao: BaseDao<T>,
   ) {}
 
   findAll(where: Record<string, any>, columns?: string[]) {
@@ -24,7 +25,7 @@ export class BaseService {
     });
   }
 
-  findOne(id: string, columns?: string[]) {
+  findOne(id: string | number, columns?: string[]) {
     return wrapInTransaction(this.poolService.pool, (poolClient) => {
       return this.dao.findOne(poolClient, id, columns);
     });
@@ -32,12 +33,6 @@ export class BaseService {
 
   findOneBy(queryable: Queryable, where: WhereCondition, columns?: Columns) {
     return this.dao.findOneBy(queryable, where, columns);
-  }
-
-  findOneByIdAndSigner(id: string, signer_id: string, columns?: string[]) {
-    return wrapInTransaction(this.poolService.pool, (poolClient) => {
-      return this.dao.findOneBy(poolClient, { id, signer_id }, columns);
-    });
   }
 
   findOneByLatest(
@@ -48,7 +43,7 @@ export class BaseService {
     return this.dao.findOneByLatest(queryable, where, columns);
   }
 
-  findOneWithPool(pool: Queryable, id: any, columns?: string[]) {
+  findOneWithPool(pool: Queryable, id: UUID | number, columns?: string[]) {
     return this.dao.findOne(pool, id, columns);
   }
 

@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDao } from '../../../core/base.dao';
-import { tableNames, Queryable } from '../../../common/constants/constants';
-import { getRows, runKnex } from '../../../utils';
+import { BaseDao } from '../../../../core/base.dao';
+import { tableNames, Queryable } from '../../../../common/constants/constants';
+import { getRows, runKnex } from '../../../../utils';
+import { QueryResultRow } from 'pg';
+import { UUID } from '../../../../common/types';
 
 @Injectable()
-export class DoctorWorkplacesDao extends BaseDao {
+export class DoctorWorkplacesDao<T extends QueryResultRow> extends BaseDao<T> {
   constructor() {
     super(tableNames.doctorWorkplaces);
   }
 
   // Idempotent assignment — re-sending the same pair is not an error.
-  assign(queryable: Queryable, doctorId: string, workplaceId: string) {
+  assign(queryable: Queryable, doctorId: UUID, workplaceId: UUID) {
     const query = this.knex(this.tableName)
       .insert({ doctor_id: doctorId, workplace_id: workplaceId })
       .onConflict(['doctor_id', 'workplace_id'])
@@ -19,16 +21,16 @@ export class DoctorWorkplacesDao extends BaseDao {
     return runKnex(queryable, query);
   }
 
-  unassign(queryable: Queryable, doctorId: string, workplaceId: string) {
+  unassign(queryable: Queryable, doctorId: UUID, workplaceId: UUID) {
     const query = this.knex(this.tableName)
       .where({ doctor_id: doctorId, workplace_id: workplaceId })
       .del();
 
-    return runKnex(queryable, query);
+    return runKnex<T>(queryable, query);
   }
 
   // All workplaces assigned to a doctor, as full objects.
-  findWorkplacesForDoctor(queryable: Queryable, doctorId: string) {
+  findWorkplacesForDoctor(queryable: Queryable, doctorId: UUID) {
     const query = this.knex
       .select(
         'workplaces.id',
@@ -41,6 +43,6 @@ export class DoctorWorkplacesDao extends BaseDao {
       .where(`${this.tableName}.doctor_id`, doctorId)
       .orderBy('workplaces.name', 'asc');
 
-    return getRows(runKnex(queryable, query));
+    return getRows<T>(runKnex<T>(queryable, query));
   }
 }

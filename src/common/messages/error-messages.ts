@@ -6,7 +6,7 @@ export const ERROR_MESSAGES = {
   UNSAFE_SQL: {
     en: 'SQL injection attempt detected',
     ru: 'Обнаружена попытка SQL-инъекции',
-    uz: "SQL in'ektsiya urinishi aniqlandi",
+    uz: 'SQL injeksiya urinishi aniqlandi',
   },
   EMAIL_ALREADY_EXISTS: {
     en: 'This email is already registered',
@@ -62,5 +62,17 @@ export const ERROR_MESSAGES = {
     en: 'Workplace not found',
     ru: 'Место работы не найдено',
     uz: 'Ish joyi topilmadi',
+  },
+  NOT_FOUND: {
+    en: 'Not found',
+    ru: 'не найдено',
+    uz: 'Topilmadi',
+  },
+  MULTIPLE_ROWS_FOUND_WHEN_ONE_ROW_REQUIRED: {
+    en: '',
+    ru: '',
+    uz: '',
+    uz_cyr:
+      'Битта маълумот танланиши керак бўлганда, бир нечта маълумот танланган. Илтимос, администраторга мурожаат қилинг',
   },
 };

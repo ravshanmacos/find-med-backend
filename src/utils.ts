@@ -1,8 +1,9 @@
 import process from 'process';
 import { Queryable, WhereInParamsType } from './common/constants/constants';
 import { QueryBuilder } from './common/types';
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import * as crypto from 'crypto';
 
 type Executor<T> = (poolClient: PoolClient) => Promise<T>;
 
@@ -24,7 +25,7 @@ export const wrapInTransaction = async <T>(
   }
 };
 
-export const runKnex = (
+export const runKnex = <T extends QueryResultRow>(
   queryable: Queryable,
   knexBuilder: QueryBuilder,
   request?: any,
@@ -33,23 +34,27 @@ export const runKnex = (
   if (process.env.SQL_DEBUG == 'true') {
     console.log(`sql_debugger: ${knexBuilder.toQuery()}`);
   }
-  return queryable.query({ text: sql, values: bindings as any[] });
+  return queryable.query<T>({ text: sql, values: bindings as any[] });
 };
 
-export const getFirstRow = async (promise: Promise<QueryResult>) => {
-  const { rows } = await promise;
-  return rows[0];
-};
-
-export const getRows = async (promise: Promise<QueryResult>) => {
+export const getRows = async <T extends QueryResultRow>(
+  promise: Promise<QueryResult<T>>,
+) => {
   const { rows } = await promise;
   return rows;
 };
 
-export const getRowsOfQuery = (
+export const getFirstRow = async <T extends QueryResultRow>(
+  promise: Promise<QueryResult<T>>,
+) => {
+  const { rows } = await promise;
+  return rows[0];
+};
+
+export const getRowsOfQuery = <T extends QueryResultRow>(
   queryable: Queryable,
   knexBuilder: QueryBuilder,
-) => getRows(runKnex(queryable, knexBuilder));
+) => getRows(runKnex<T>(queryable, knexBuilder));
 
 export const assignWhereInParamsToQuery = (
   query: QueryBuilder,
@@ -77,4 +82,24 @@ export const isUnsafeQuery = (sql: any) => {
   ) {
     throw new HttpException('ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
   }
+};
+
+export const hashToken = (token: string): string => {
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+export const parseExpiryToMs = (value: string): number => {
+  const match = value.match(/^(\d+)([smhd])$/);
+  if (!match) return 30 * 24 * 60 * 60 * 1000;
+
+  const amount = Number(match[1]);
+  const unit = match[2] as 's' | 'm' | 'h' | 'd';
+  const multipliers: Record<typeof unit, number> = {
+    s: 1000,
+    m: 60_000,
+    h: 3_600_000,
+    d: 86_400_000,
+  };
+
+  return amount * multipliers[unit];
 };

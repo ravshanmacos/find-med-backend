@@ -21,6 +21,7 @@ import {
 import { ERROR_MESSAGES } from '../common/messages/error-messages';
 import { knexConfig } from '../../knexfile';
 import { SQLException } from '../common/exceptions/sql.exceptions';
+import { QueryResultRow } from 'pg';
 
 export const knex = Knex(knexConfig);
 export const migrate = async (): Promise<any> => {
@@ -35,7 +36,7 @@ interface BaseDaoFields {
   whereInParams: WhereInParamsType[] | null;
 }
 
-export class BaseDao implements BaseDaoFields {
+export class BaseDao<T extends QueryResultRow> implements BaseDaoFields {
   public knex = knex;
   whereInParams: WhereInParamsType[] | null = null;
 
@@ -127,10 +128,10 @@ export class BaseDao implements BaseDaoFields {
     const _columns = columns || this.getDefaultColumns();
 
     let query = this.knex.select(_columns).from(this.tableName);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (where) query = this._addWhere(query, where);
+
     if (orderBy) {
-      // Security fix: Validate column name to prevent SQL injection
       this.validateColumnName(orderBy.column);
       if (orderBy && orderBy.column)
         query = query.orderBy(orderBy.column, orderBy.asc ? 'asc' : 'desc');
@@ -143,7 +144,7 @@ export class BaseDao implements BaseDaoFields {
       query.offset(offset);
     }
 
-    return getRows(runKnex(queryable, query));
+    return getRows<T>(runKnex<T>(queryable, query));
   }
 
   findAllByIds(queryable: Queryable, ids: UUID[], columns?: Columns) {
@@ -194,7 +195,7 @@ export class BaseDao implements BaseDaoFields {
   ) {
     const _columns = columns || this.getDefaultColumns();
     const query = this.knex.select(_columns).from(this.tableName).where({ id });
-    return await getFirstRow(runKnex(queryable, query, request));
+    return await getFirstRow<T>(runKnex<T>(queryable, query, request));
   }
 
   // async findOneAdmin(queryable: Queryable, columns?: Columns, request?: any) {
@@ -226,7 +227,7 @@ export class BaseDao implements BaseDaoFields {
     let query = this.knex.select(_columns).from(this.tableName);
     if (where) query = this._addWhere(query, where);
 
-    return await getFirstRow(runKnex(queryable, query));
+    return await getFirstRow<T>(runKnex<T>(queryable, query));
   }
 
   async findOneByLatest(
@@ -247,7 +248,7 @@ export class BaseDao implements BaseDaoFields {
 
   insert(queryable: Queryable, values: Values) {
     const query = knex.insert(values).into(this.tableName).returning('*');
-    return getFirstRow(runKnex(queryable, query));
+    return getFirstRow<T>(runKnex<T>(queryable, query));
   }
 
   insertWithoutId(queryable: Queryable, values: Values) {
@@ -271,7 +272,7 @@ export class BaseDao implements BaseDaoFields {
     }
     let query = knex.update(values).from(this.tableName).returning('*');
     if (where) query = this._addWhere(query, where);
-    return getRows(runKnex(queryable, query));
+    return getRows<T>(runKnex<T>(queryable, query));
   }
 
   async updateByIds(queryable: Queryable, values: Values, ids: UUID[]) {
