@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { BaseService } from 'src/core/base.service';
 import { PoolService } from 'src/core/pool.service';
+import { GenericService } from 'src/core/generic.service';
 import { RegionsDao } from './regions.dao';
-import { DistrictsDao } from './districts.dao';
+import { Region } from '../models/region.model';
+import { DistrictsService } from '../modules/districts/providers/districts.service';
 
 @Injectable()
-export class RegionsService extends BaseService {
+export class RegionsService extends GenericService<Region> {
   constructor(
     poolService: PoolService,
-    private readonly regionsDao: RegionsDao,
-    private readonly districtsDao: DistrictsDao,
+    private readonly regionsDao: RegionsDao<Region>,
+    private readonly districtsService: DistrictsService,
   ) {
     super(poolService, regionsDao);
   }
@@ -22,6 +23,10 @@ export class RegionsService extends BaseService {
   }
 
   districtsByRegion(regionId: number) {
-    return this.districtsDao.findByRegion(this.poolService.pool, regionId);
+    return this.districtsService.findByRegion(this.poolService.pool, regionId);
+  }
+
+  getDefaultColumns(): string[] | Record<string, any> {
+    return ['*'];
   }
 }

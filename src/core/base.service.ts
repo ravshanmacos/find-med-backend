@@ -35,12 +35,6 @@ export class BaseService<T extends QueryResultRow> {
     return this.dao.findOneBy(queryable, where, columns);
   }
 
-  findOneByIdAndSigner(id: string, signer_id: string, columns?: string[]) {
-    return wrapInTransaction(this.poolService.pool, (poolClient) => {
-      return this.dao.findOneBy(poolClient, { id, signer_id }, columns);
-    });
-  }
-
   findOneByLatest(
     queryable: Queryable,
     where: WhereCondition,

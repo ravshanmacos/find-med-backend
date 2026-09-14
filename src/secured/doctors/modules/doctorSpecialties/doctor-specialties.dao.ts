@@ -12,7 +12,7 @@ export class DoctorSpecialtiesDao<T extends QueryResultRow> extends BaseDao<T> {
   }
 
   // Idempotent assignment — re-sending the same pair is not an error.
-  assign(queryable: Queryable, doctorId: UUID, specialtyId: number) {
+  assign(queryable: Queryable, doctorId: UUID, specialtyId: UUID) {
     const query = this.knex(this.tableName)
       .insert({ doctor_id: doctorId, specialty_id: specialtyId })
       .onConflict(['doctor_id', 'specialty_id'])
@@ -21,7 +21,7 @@ export class DoctorSpecialtiesDao<T extends QueryResultRow> extends BaseDao<T> {
     return runKnex<T>(queryable, query);
   }
 
-  unassign(queryable: Queryable, doctorId: UUID, specialtyId: number) {
+  unassign(queryable: Queryable, doctorId: UUID, specialtyId: UUID) {
     const query = this.knex(this.tableName)
       .where({ doctor_id: doctorId, specialty_id: specialtyId })
       .del();

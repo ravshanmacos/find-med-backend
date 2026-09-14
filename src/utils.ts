@@ -3,6 +3,7 @@ import { Queryable, WhereInParamsType } from './common/constants/constants';
 import { QueryBuilder } from './common/types';
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import * as crypto from 'crypto';
 
 type Executor<T> = (poolClient: PoolClient) => Promise<T>;
 
@@ -81,4 +82,24 @@ export const isUnsafeQuery = (sql: any) => {
   ) {
     throw new HttpException('ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
   }
+};
+
+export const hashToken = (token: string): string => {
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+export const parseExpiryToMs = (value: string): number => {
+  const match = value.match(/^(\d+)([smhd])$/);
+  if (!match) return 30 * 24 * 60 * 60 * 1000;
+
+  const amount = Number(match[1]);
+  const unit = match[2] as 's' | 'm' | 'h' | 'd';
+  const multipliers: Record<typeof unit, number> = {
+    s: 1000,
+    m: 60_000,
+    h: 3_600_000,
+    d: 86_400_000,
+  };
+
+  return amount * multipliers[unit];
 };

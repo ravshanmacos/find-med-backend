@@ -9,13 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { LoginRequest } from './modules/users/models/user.model';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterRequest } from './modules/users/models/user.model';
 import { AcceptDoctorInviteDto } from './dto/accept-doctor-invite.dto';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
-import { JwtAuthGuard } from '../config/guards/jwt-auth.guard';
-import { RolesGuard } from '../config/guards/roles.guard';
+import { RolesGuard, JwtAuthGuard } from 'src/config/guards';
 import { Roles } from '../config/decorators/roles.decorator';
 
 // Note: register/login/refresh/logout/accept-invite are intentionally
@@ -26,13 +25,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
+  register(@Body() dto: RegisterRequest) {
     return this.authService.register(dto);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
+  login(@Body() dto: LoginRequest) {
     return this.authService.login(dto);
   }
 

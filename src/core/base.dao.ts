@@ -227,7 +227,7 @@ export class BaseDao<T extends QueryResultRow> implements BaseDaoFields {
     let query = this.knex.select(_columns).from(this.tableName);
     if (where) query = this._addWhere(query, where);
 
-    return await getFirstRow(runKnex(queryable, query));
+    return await getFirstRow<T>(runKnex<T>(queryable, query));
   }
 
   async findOneByLatest(

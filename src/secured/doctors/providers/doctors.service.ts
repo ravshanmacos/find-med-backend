@@ -4,18 +4,18 @@ import { wrapInTransaction } from 'src/utils';
 import { ERROR_MESSAGES } from 'src/common/messages/error-messages';
 import { DoctorException } from 'src/common/exceptions/doctor.exceptions';
 import { Principal } from 'src/common/principal';
+import { GenericService } from 'src/core/generic.service';
+import { WorkplacesService } from 'src/secured/workplaces/providers/workplaces.service';
+import { SpecialtiesService } from 'src/secured/specialties/providers/specialties.service';
 import { DoctorsDao } from './doctors.dao';
-import { UpdateDoctorDto } from '../dto/update-doctor.dto';
-import { AssignSpecialtyDto } from '../dto/assign-specialty.dto';
-import { AssignWorkplaceDto } from '../dto/assign-workplace.dto';
-import { GenericService } from '../../../core/generic.service';
+import {
+  UpdateDoctorDto,
+  AssignSpecialtyDto,
+  AssignWorkplaceDto,
+} from '../dto';
 import { Doctor } from '../models/doctor.model';
-import { SpecialtiesService } from '../../specialties/providers/specialties.service';
 import { DoctorSpecialtiesService } from '../modules/doctorSpecialties/doctor-specialties.service';
-import { WorkplacesService } from '../../workplaces/providers/workplaces.service';
 import { DoctorWorkplacesService } from '../modules/doctorWorkplaces/doctor-workplaces.service';
-import { PoolClient } from 'pg';
-import { UUID } from '../../../common/types';
 
 @Injectable()
 export class DoctorsService extends GenericService<Doctor> {

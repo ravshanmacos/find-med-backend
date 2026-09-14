@@ -1,7 +1,7 @@
 import Knex from 'knex';
 import { GenericModel } from 'src/core/generic.model';
 
-export type UUID = string;
+export type UUID = string | number;
 
 export type BaseType = GenericModel;
 

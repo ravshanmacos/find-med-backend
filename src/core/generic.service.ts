@@ -18,7 +18,7 @@ export abstract class GenericService<
 
   abstract getDefaultColumns(): string[] | Record<string, any>;
 
-  findOne(id: UUID | number) {
+  findOne(id: UUID) {
     return super.findOne(id);
   }
 
@@ -34,7 +34,7 @@ export abstract class GenericService<
     } else return null;
   }
 
-  async checkForExistById(id: UUID | number) {
+  async checkForExistById(id: UUID) {
     const item = await this.findOne(id);
 
     if (!item || !item?.id) {
@@ -44,7 +44,7 @@ export abstract class GenericService<
     return item;
   }
 
-  async checkForExistByIdWithPool(pool: Queryable, id: UUID | number) {
+  async checkForExistByIdWithPool(pool: Queryable, id: UUID) {
     const item = await this.findOneWithPool(pool, id);
 
     if (!item || !item?.id) {

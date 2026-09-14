@@ -18,11 +18,11 @@ export class DoctorSpecialtiesService extends GenericService<DoctorSpecialtiesMo
     return this.dao.findSpecialtiesForDoctor(queryable, doctorId);
   }
 
-  assign(queryable: Queryable, doctorId: UUID, specialtyId: number) {
+  assign(queryable: Queryable, doctorId: UUID, specialtyId: UUID) {
     return this.dao.assign(queryable, doctorId, specialtyId);
   }
 
-  unassign(queryable: Queryable, doctorId: UUID, specialtyId: number) {
+  unassign(queryable: Queryable, doctorId: UUID, specialtyId: UUID) {
     return this.dao.unassign(queryable, doctorId, specialtyId);
   }
 

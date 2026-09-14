@@ -1,8 +1,9 @@
 import type { DateORString, UUID } from '../common/types';
-import { IsDate, IsOptional, IsUUID } from 'class-validator';
+import { IsDate, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export interface IGenericModels {
+  id: UUID;
   created_at?: DateORString;
   created_by?: UUID;
   updated_at?: DateORString;
@@ -10,6 +11,9 @@ export interface IGenericModels {
 }
 
 export class GenericModel implements IGenericModels {
+  @IsNotEmpty()
+  id: UUID;
+
   @IsDate()
   @ApiPropertyOptional({
     description: 'Creating date/time of record',

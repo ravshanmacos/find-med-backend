@@ -10,7 +10,6 @@ import {
 } from 'class-validator';
 
 export interface IDoctor extends GenericModel {
-  id: UUID;
   user_id?: UUID;
   full_name: string;
   bio?: string;
@@ -21,10 +20,6 @@ export interface IDoctor extends GenericModel {
 }
 
 export class Doctor extends GenericModel implements IDoctor {
-  @IsNotEmpty()
-  @IsUUID()
-  id: UUID;
-
   @IsOptional()
   @IsUUID()
   user_id?: UUID;

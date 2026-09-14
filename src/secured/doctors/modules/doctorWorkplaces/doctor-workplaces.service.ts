@@ -3,6 +3,7 @@ import { PoolService } from 'src/core/pool.service';
 import { DoctorWorkplacesModel } from '../../models/doctorWorkplaces.model';
 import { DoctorWorkplacesDao } from './doctor-workplaces.dao';
 import { Queryable } from '../../../../common/constants/constants';
+import { UUID } from '../../../../common/types';
 
 export class DoctorWorkplacesService extends GenericService<DoctorWorkplacesModel> {
   constructor(
@@ -12,15 +13,15 @@ export class DoctorWorkplacesService extends GenericService<DoctorWorkplacesMode
     super(pool, dao);
   }
 
-  findWorkplacesForDoctor(queryable: Queryable, doctorId: string) {
+  findWorkplacesForDoctor(queryable: Queryable, doctorId: UUID) {
     return this.dao.findWorkplacesForDoctor(queryable, doctorId);
   }
 
-  assign(queryable: Queryable, doctorId: string, workplaceId: string) {
+  assign(queryable: Queryable, doctorId: UUID, workplaceId: UUID) {
     return this.dao.assign(queryable, doctorId, workplaceId);
   }
 
-  unassign(queryable: Queryable, doctorId: string, workplaceId: string) {
+  unassign(queryable: Queryable, doctorId: UUID, workplaceId: UUID) {
     return this.dao.unassign(queryable, doctorId, workplaceId);
   }
 

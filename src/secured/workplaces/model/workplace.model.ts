@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 
 export interface IWorkplace extends GenericModel {
-  id: UUID;
   name: string;
   address?: string;
   phone?: string;
@@ -18,11 +17,6 @@ export interface IWorkplace extends GenericModel {
 }
 
 export class Workplace extends GenericModel implements IWorkplace {
-
-  @IsNotEmpty()
-  @IsUUID()
-  id: UUID;
-
   @IsNotEmpty()
   @IsString()
   name: string;
