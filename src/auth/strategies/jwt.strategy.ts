@@ -22,11 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   // Runs on every protected request — even with a validly signed token,
   // re-checks that the user still exists and is active in the database.
   async validate(payload: JwtPayload): Promise<Principal> {
-    const user = await this.usersService.checkForExistByIdWithPool(
-      this.poolService.pool,
-      payload.sub,
-    );
-
+    const user = await this.usersService.checkForExistById(payload.sub);
     if (!user || !user.is_active) {
       throw new UnauthorizedException();
     }
