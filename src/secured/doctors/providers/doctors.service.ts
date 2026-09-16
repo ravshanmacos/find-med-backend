@@ -190,13 +190,6 @@ export class DoctorsService extends GenericService<Doctor> {
   }
 
   private checkPrivilage(doctor: Doctor, requestingUser: Principal) {
-    if (!doctor.user_id)
-      throw new DoctorException(
-        ERROR_MESSAGES.NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-        'user_id',
-      );
-
     const isAdmin = requestingUser.role === 'ADMIN';
     const isOwner = doctor.user_id === requestingUser.userId;
 
@@ -208,7 +201,11 @@ export class DoctorsService extends GenericService<Doctor> {
     }
   }
 
-  getDefaultColumns(): string[] | Record<string, any> {
-    return ['*'];
+  getDefaultColumns(): string[] {
+    return defaultColumns;
   }
 }
+
+const defaultColumns = ['*']; //Object.keys({});
+
+const getProps = ({}) => ({});

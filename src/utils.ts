@@ -56,6 +56,11 @@ export const getRowsOfQuery = <T extends QueryResultRow>(
   knexBuilder: QueryBuilder,
 ) => getRows(runKnex<T>(queryable, knexBuilder));
 
+export const getFirstRowOfQuery = <T extends QueryResultRow>(
+  queryable: Queryable,
+  KnexBuilder: QueryBuilder,
+) => getFirstRow(runKnex<T>(queryable, KnexBuilder));
+
 export const assignWhereInParamsToQuery = (
   query: QueryBuilder,
   whereInParams: WhereInParamsType[],

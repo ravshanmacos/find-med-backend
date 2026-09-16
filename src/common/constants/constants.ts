@@ -7,6 +7,7 @@ export type WhereInParamsType = {
 };
 
 export const tableNames = {
+  cron: 'cron',
   products: 'products',
   users: 'users',
   patients: 'patients',
@@ -20,3 +21,9 @@ export const tableNames = {
   regions: 'regions',
   districts: 'districts',
 };
+
+export enum CronNames {
+  TIMER_CRON = 'TIMER-CRON',
+  CROP_CRON = 'CROP_CRON',
+  HARVEST_CRON = 'HARVEST_CRON',
+}
