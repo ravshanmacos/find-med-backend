@@ -208,7 +208,11 @@ export class DoctorsService extends GenericService<Doctor> {
     }
   }
 
-  getDefaultColumns(): string[] | Record<string, any> {
-    return ['*'];
+  getDefaultColumns(): string[] {
+    return defaultColumns;
   }
 }
+
+const defaultColumns = ['*']; //Object.keys({});
+
+const getProps = ({}) => ({});
