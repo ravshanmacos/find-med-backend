@@ -10,14 +10,14 @@ import { UUID } from '../../../common/types';
 @Injectable()
 export class PatientsService extends GenericService<Patient> {
   constructor(
-    poolService: PoolService,
-    private readonly patientsDao: PatientsDao<Patient>,
+    protected readonly poolService: PoolService,
+    protected readonly dao: PatientsDao<Patient>,
   ) {
-    super(poolService, patientsDao);
+    super(poolService, dao);
   }
 
   findByUserId(userId: UUID) {
-    return this.findOne(userId);
+    return this.findOneBy(this.poolService.pool, { user_id: userId });
   }
 
   async updateOwn(userId: UUID, dto: UpdatePatientDto) {
