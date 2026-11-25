@@ -41,6 +41,8 @@ COPY --from=build /app/dist ./dist
 #build dan /app/migrations ni hozirgi  app/migrations ga ko'chir
 COPY --from=build /app/migrations ./migrations
 
+COPY --from=build /app/seeds ./seeds
+
 #foydalanuvchi node bo'lsin
 USER node
 
